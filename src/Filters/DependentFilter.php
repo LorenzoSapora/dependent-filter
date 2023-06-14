@@ -9,62 +9,26 @@ use Laravel\Nova\Filters\Filter;
 
 class DependentFilter extends Filter
 {
-    /**
-     * @var callable|null
-     */
     protected $optionsCallback;
 
-    /**
-     * @var callable|null
-     */
     protected $applyCallback;
 
-    /**
-     * @var string[]
-     */
     public $dependentOf = [];
 
-    /**
-     * Default value.
-     *
-     * @var mixed
-     */
     public $default = '';
 
-    /**
-     * @var string
-     */
     public $attribute;
 
-    /**
-     * @var bool
-     */
     public $hideWhenEmpty = false;
 
-    /**
-     * @var string
-     */
     public $component = 'awesome-nova-dependent-filter';
 
-    /**
-     * RelatedFilter constructor.
-     * @param null $name
-     * @param null $attribute
-     */
     public function __construct($name = null, $attribute = null)
     {
         $this->name = $name ?? $this->name;
         $this->attribute = $attribute ?? $this->attribute ?? str_replace(' ', '_', Str::lower($this->name()));
     }
 
-    /**
-     * Apply the filter to the given query.
-     *
-     * @param  \Illuminate\Http\Request $request
-     * @param  \Illuminate\Database\Eloquent\Builder $query
-     * @param  mixed $value
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
     public function apply(NovaRequest $request, $query, $value)
     {
         if ($this->applyCallback) {
@@ -74,32 +38,16 @@ class DependentFilter extends Filter
         return $query->whereIn($this->attribute, (array)$value);
     }
 
-    /**
-     * Get the key for the filter.
-     *
-     * @return string
-     */
     public function key()
     {
         return $this->attribute;
     }
 
-    /**
-     * Get the filter's available options.
-     *
-     * @param  \Illuminate\Http\Request $request
-     * @param  array $filters
-     * @return array|\Illuminate\Support\Collection
-     */
     public function options(NovaRequest $request, array $filters = [])
     {
         return call_user_func($this->optionsCallback, $request, $filters);
     }
 
-    /**
-     * @param  string|string[] $filter
-     * @return $this
-     */
     final public function dependentOf($filter)
     {
         if (! is_array($filter)) {
@@ -111,11 +59,6 @@ class DependentFilter extends Filter
         return $this;
     }
 
-    /**
-     * @param  \Illuminate\Http\Request $request
-     * @param  array $filters
-     * @return array
-     */
     final public function getOptions(NovaRequest $request, array $filters = [])
     {
         return collect(
@@ -125,11 +68,6 @@ class DependentFilter extends Filter
         })->values()->all();
     }
 
-    /**
-     * @param  callable|array $callback
-     *
-     * @return $this
-     */
     final public function withOptions($callback, $dependentOf = null)
     {
         if (! is_callable($callback)) {
@@ -147,12 +85,6 @@ class DependentFilter extends Filter
         return $this;
     }
 
-    /**
-     * Set the default value for the filter.
-     *
-     * @param  mixed|array $value
-     * @return $this
-     */
     final public function withDefault($value)
     {
         $this->default = $value;
@@ -160,32 +92,17 @@ class DependentFilter extends Filter
         return $this;
     }
 
-    /**
-     * Get the default options for the filter.
-     *
-     * @return array|mixed
-     */
     public function default()
     {
         return $this->default;
     }
 
-    /**
-     * Set callback for apply method.
-     *
-     * @param  callable $callback
-     * @return $this
-     */
     final public function withApply(callable $callback)
     {
         $this->applyCallback = $callback;
         return $this;
     }
 
-    /**
-     * @param  bool $value
-     * @return $this
-     */
     public function hideWhenEmpty($value = true)
     {
         $this->hideWhenEmpty = $value;
@@ -193,28 +110,19 @@ class DependentFilter extends Filter
         return $this;
     }
 
-    /**
-     * Prepare the filter for JSON serialization.
-     *
-     * @return array
-     */
     public function jsonSerialize(): array
     {
         return array_merge([
             'class' => $this->key(),
             'name' => $this->name(),
             'component' => $this->component(),
-            'options' => count($this->dependentOf) === 0 ? $this->getOptions(app(Request::class)) : [],
+            'options' => count($this->dependentOf) === 0 ? $this->getOptions(app(NovaRequest::class)) : [],
             'currentValue' => $this->default() ?? '',
             'dependentOf' => $this->dependentOf,
             'hideWhenEmpty' => $this->hideWhenEmpty,
         ], $this->meta());
     }
 
-    /**
-     * @param  mixed[] ...$args
-     * @return static
-     */
     public static function make(...$args)
     {
         return new static(...$args);
