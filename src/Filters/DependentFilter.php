@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace AwesomeNova\Filters;
 
-use Illuminate\Http\Request;
+use Laravel\Nova\Http\Requests\NovaRequest;
 use Illuminate\Support\Str;
 use Laravel\Nova\Filters\Filter;
 
@@ -65,7 +65,7 @@ class DependentFilter extends Filter
      * @param  mixed $value
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function apply(Request $request, $query, $value)
+    public function apply(NovaRequest $request, $query, $value)
     {
         if ($this->applyCallback) {
             return call_user_func($this->applyCallback, $request, $query, $value);
@@ -91,7 +91,7 @@ class DependentFilter extends Filter
      * @param  array $filters
      * @return array|\Illuminate\Support\Collection
      */
-    public function options(Request $request, array $filters = [])
+    public function options(NovaRequest $request, array $filters = [])
     {
         return call_user_func($this->optionsCallback, $request, $filters);
     }
@@ -116,7 +116,7 @@ class DependentFilter extends Filter
      * @param  array $filters
      * @return array
      */
-    final public function getOptions(Request $request, array $filters = [])
+    final public function getOptions(NovaRequest $request, array $filters = [])
     {
         return collect(
             $this->options($request, $filters + array_fill_keys($this->dependentOf, ''))
